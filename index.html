@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html>
+	<head>
+        <title>Proyecto 2 js.espitia</title>
+    </head>
+    <body>
+        <script type="module">
+import * as THREE from 'https://threejsfundamentals.org/threejs/resources/threejs/r122/build/three.module.js';
+import {OrbitControls} from 'https://threejsfundamentals.org/threejs/resources/threejs/r122/examples/jsm/controls/OrbitControls.js';
+import {GLTFLoader} from 'https://threejsfundamentals.org/threejs/resources/threejs/r122/examples/jsm/loaders/GLTFLoader.js';
+
+const scene = new THREE.Scene();
+scene.background = new THREE.Color( 0x87ceeb );
+const camera = new THREE.PerspectiveCamera( 75, window.innerWidth / window.innerHeight, 0.1, 1000 );
+
+const renderer = new THREE.WebGLRenderer();
+renderer.setSize( window.innerWidth, window.innerHeight );
+document.body.appendChild( renderer.domElement );
+
+const clock = new THREE.Clock();
+
+const controls = new OrbitControls( camera, renderer.domElement );
+controls.update();
+
+renderer.setPixelRatio( window.devicePixelRatio );
+
+const color = 0xFFFFFF;
+const intensity = 1;
+const light = new THREE.AmbientLight(color, intensity);
+scene.add(light);
+
+const light2 = new THREE.DirectionalLight(color, intensity);
+light2.position.set(-10, 10, 0);
+light2.target.position.set(0, 0, 0);
+scene.add(light2);
+scene.add(light2.target);
+
+//Initialization of objects
+var Man, Wolf, Bird, Map, BirdGroup
+var ManAnimations, WolfAnimations, BirdAnimations
+var ManAction, WolfAction, BirdAction
+var ManMixer, WolfMixer, BirdMixer
+var FinalText
+
+
+var loader = new GLTFLoader()
+loader.setPath('../models/wolf_with_animations/')
+//load wolves
+loader.load('wolf.glb',function(object){
+    Wolf = object.scene
+    WolfAnimations = object.animations
+    console.log(object)
+    Wolf.position.set(-2,2.2,-2.5)
+    Wolf.scale.set(0.3,0.3,0.3)
+    Wolf.rotation.set(0,Math.PI/2,0)
+    scene.add(Wolf)
+
+    WolfMixer = new THREE.AnimationMixer(Wolf)
+    WolfAction = WolfMixer.clipAction(WolfAnimations[0])
+    WolfAction.play()
+})
+
+
+//load main character
+loader.setPath('../models/')
+
+loader.load('character1.glb',function(object){
+    Man = object.scene
+    ManAnimations = object.animations
+    Man = object.scene
+    console.log(object)
+    Man.position.set(-2,2.1,-2)
+    Man.scale.set(0.3,0.3,0.3)
+    Man.rotation.set(0,Math.PI,0)
+    scene.add(Man)
+    ManMixer = new THREE.AnimationMixer(Man)
+    ManAction = ManMixer.clipAction(ManAnimations[1])
+    ManAction.play()
+    
+})
+
+//load bird
+loader.setPath('../models/phoenix_bird/')
+loader.load('scene.gltf',function(object){
+    Bird = object.scene
+    BirdAnimations = object.animations
+    Bird = object.scene
+    Bird.scale.set(0.0005,0.0005,0.0005)
+    Bird.position.set(0,4,-6)
+    Bird.rotation.set(0,Math.PI,0)
+    console.log(object)
+    scene.add(Bird)
+
+    BirdMixer = new THREE.AnimationMixer(Bird)
+    BirdAction = BirdMixer.clipAction(BirdAnimations[0])
+    BirdAction.play()
+})
+
+//load map
+loader.setPath('../models/voxel_free_map/')
+loader.load('scene.gltf',function(object){
+    Map = object.scene
+    Map = object.scene
+    console.log(object)
+    Map.rotation.set(0,Math.PI/2,0)
+    scene.add(Map)
+})
+/**/
+
+//load final text
+const loader2 = new THREE.FontLoader();
+loader2.load('https://unpkg.com/three@0.77.0/examples/fonts/helvetiker_regular.typeface.json', (font) => {
+   const text = 'YOU SURVIVED!';  
+
+   const geometry10 = new THREE.TextBufferGeometry(text, {
+     font: font,
+     size: 0.03,  
+     height: 0.01,  
+     curveSegments: 12,  
+     bevelEnabled: false,  
+     bevelThickness: 0.1,  
+     bevelSize: 0.001,  
+     bevelSegments: 3,  
+
+   });
+   const material10 = new THREE.MeshBasicMaterial({color: 0xffd700, emissive: 0xffd700, side: THREE.BackSide, opacity:0, transparent:true});
+   FinalText = new THREE.Mesh( geometry10, material10);
+
+   FinalText.position.set(-1.9, 1.7, 2)
+   FinalText.rotation.set(0,Math.PI,0)
+   scene.add( FinalText );
+});
+
+const axesHelper = new THREE.AxesHelper( 100);
+scene.add( axesHelper );
+
+camera.position.set(-1.5,4.3,-4.5)
+camera.updateProjectionMatrix()
+
+let time = 0;
+const animate = function () {
+    requestAnimationFrame( animate );
+    let delta = clock.getDelta()
+    //console.log(clock.getElapsedTime())
+    if(ManMixer) ManMixer.update(delta)
+    if(WolfMixer) WolfMixer.update(delta)
+    if(BirdMixer) BirdMixer.update(delta)
+    controls.update();
+    if(clock.getElapsedTime()<4.1) {
+        Wolf.position.z+=0.0148
+        Man.position.z+=0.0158 
+    }
+    if(clock.getElapsedTime()>4.1 && clock.getElapsedTime()<4.4){
+        camera.position.set(-2.93,2.26,2.26)
+        camera.rotation.set(-0.71,-0.65,-0.48)
+
+        let sittingAction = WolfMixer.clipAction(WolfAnimations[4])
+        sittingAction.clampWhenFinished = true
+        sittingAction.setLoop(THREE.LoopRepeat, 1)
+        WolfAction.crossFadeTo(sittingAction, 0.3, true).play();
+        WolfAction = sittingAction
+
+        let fall = ManMixer.clipAction(ManAnimations[0])
+        fall.setLoop(THREE.LoopRepeat, 1)
+        ManAction.crossFadeTo(fall, 0.4, true).play()
+        ManAction = fall
+        Man.position.y-=0.03
+        Man.position.z += 0.017
+    }
+    if(clock.getElapsedTime()>4.4 && clock.getElapsedTime()<4.6){
+        Man.position.z += 0.017
+        Man.position.y -= 0.05
+    }
+
+    if(clock.getElapsedTime()>4.6 && clock.getElapsedTime()<6){
+        let turn = ManMixer.clipAction(ManAnimations[2])
+        turn.clampWhenFinished = true
+        turn.setLoop(THREE.LoopRepeat, 1)
+        
+        ManAction.crossFadeTo(turn, 2, true).play()
+        ManAction = turn
+    }
+    if(clock.getElapsedTime()>6){
+        camera.position.set(-2.03,1.4,3.70)
+        camera.rotation.set(-2.7,Math.PI,-3.11)
+        Bird.position.x-=0.01
+    }
+    if(clock.getElapsedTime()>10){
+        camera.position.set(-2.07,1.35,0.7)
+        camera.rotation.set(0,Math.PI,0)
+    }
+    if(clock.getElapsedTime()>11){        
+        FinalText.material.opacity+=0.05
+    }
+    //Bird.position.x-=0.04
+    renderer.render( scene, camera );
+};
+
+const findAnimation = (object, name)=>(!!object.animations)?
+                object.animations.find((animation)=>animation.name===name)
+                :undefined
+
+animate();
+        </script>
+    </body>
+</html>

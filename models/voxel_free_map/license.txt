@@ -1,0 +1,11 @@
+Model Information:
+* title:	Voxel free
+* source:	https://sketchfab.com/3d-models/voxel-free-c035def6753a4b97a0e90d00b9d94785
+* author:	Raghavprasanna (https://sketchfab.com/Raghavprasanna)
+
+Model License:
+* license type:	CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
+* requirements:	Author must be credited. Commercial use is allowed.
+
+If you use this 3D model in your project be sure to copy paste this credit wherever you share it:
+This work is based on "Voxel free" (https://sketchfab.com/3d-models/voxel-free-c035def6753a4b97a0e90d00b9d94785) by Raghavprasanna (https://sketchfab.com/Raghavprasanna) licensed under CC-BY-4.0 (http://creativecommons.org/licenses/by/4.0/)
